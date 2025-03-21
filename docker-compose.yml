@@ -1,95 +1,49 @@
-#services:
-#    php:
-#        build:
-#            context: ./docker/php  # Path to the directory containing the PHP Dockerfile
-#        container_name: laravel-php
-#        volumes:
-#            - .:/var/www  # Mount the entire project directory AFTER the build
-#        networks:
-#            - laravel-network
-#        environment:
-#            - DB_HOST=localhost
-#            - DB_PORT=3306
-#            - DB_DATABASE=kubernetes
-#            - DB_USERNAME=root
-#            - DB_PASSWORD=Manik@1234
-#            - REDIS_HOST=localhost
-#            - REDIS_PORT=6379
-#
-#    nginx:
-#        image: nginx:latest
-#        container_name: laravel-nginx
-#        ports:
-#            - "8082:80"
-#        volumes:
-#            - .:/var/www  # Mount the entire project directory
-#            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-#        networks:
-#            - laravel-network
-#        depends_on:
-#            - php
-#
-#    node:
-#        build:
-#            context: ./docker/nodejs  # Path to the directory containing the Node.js Dockerfile
-#        container_name: laravel-node
-#        volumes:
-#            - .:/var/www  # Mount the entire project directory
-#        networks:
-#            - laravel-network
-#        command: ["npm", "run", "dev"]
-#        ports:
-#            - "3000:3000"  # Expose the dev server port
-#
-#networks:
-#    laravel-network:
-#        driver: bridge
-
-
 services:
     laravel_app:
-        platform: linux/amd64
         build:
-            args:
-                user: laravel_user
-                uid: 1000
-            context: .
+            context: ./docker/laravel_app
             dockerfile: Dockerfile
-        image: laravel_app_image
         container_name: laravel_app
-        restart: unless-stopped
-        working_dir: /var/www
-        environment:
-            - DB_HOST=host.docker.internal      # MySQL running on the host
-            - DB_PORT=3306                      # MySQL default port
-            - DB_DATABASE=kubernetes            # Database name
-            - DB_USERNAME=root                  # Database username
-            - DB_PASSWORD=Manik@1234            # Database password
-            - REDIS_HOST=host.docker.internal   # Redis running on the host
-            - REDIS_PORT=6379                   # Redis default port
+        ports:
+            - "8082:9000"  # Map port 9000 inside the container to port 8082 on your host
         volumes:
-            - ./:/var/www
+            - .:/var/www
+        environment:
+            - DB_HOST=host.docker.internal
+            - DB_PORT=3306
+            - DB_DATABASE=kubernetes
+            - DB_USERNAME=root
+            - DB_PASSWORD=Manik@1234
+            - REDIS_HOST=host.docker.internal
+            - REDIS_PORT=6379
         networks:
             - laravel_network
-        ports:
-            - "8082:9000"  # Swoole server runs on port 9000, mapped to 8082 on your host
 
-    laravel_webserver:
-        platform: linux/amd64
-        image: nginx:alpine
-        container_name: laravel_webserver_container
-        restart: unless-stopped
+    nginx:
+        build:
+            context: ./docker/nginx
+            dockerfile: Dockerfile
+        container_name: nginx_container
         ports:
-            - "6162:80"  # Exposes nginx on port 6162
+            - "6162:80"  # Expose Nginx on port 6162
         depends_on:
             - laravel_app
         volumes:
-            - ./:/var/www
-            - ./docker/nginx/:/etc/nginx/conf.d
+            - .:/var/www
+            - ./docker/nginx:/etc/nginx/conf.d
+        networks:
+            - laravel_network
+
+    nodejs:
+        build:
+            context: ./docker/nodejs
+            dockerfile: Dockerfile
+        container_name: nodejs_container
+        volumes:
+            - .:/var/www
         networks:
             - laravel_network
 
 networks:
     laravel_network:
         driver: bridge
-

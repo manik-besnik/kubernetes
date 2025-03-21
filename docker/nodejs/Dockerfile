@@ -1,21 +1,23 @@
-# Use the official Node.js image
-FROM node:latest
+# Use Ubuntu as the base image
+FROM ubuntu:20.04
 
-# Set the working directory for the Node.js container
+# Install Node.js and npm
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm \
+    && apt-get clean
+
+# Set the working directory
 WORKDIR /var/www
 
-# Copy package.json and package-lock.json to the container
-# Adjust the source path based on your directory structure
-COPY package*.json ./
+# Copy the project files into the container
+COPY . /var/www
 
-# Install npm dependencies
+# Install JS dependencies
 RUN npm install
 
-# Copy the rest of the frontend code into the container
-COPY ./resources/js/ ./
-
-# Expose port for the frontend dev server (assuming Vite or Webpack)
+# Expose port 3000 for Node.js
 EXPOSE 3000
 
-# Run the development server
-CMD ["npm", "run", "dev"]
+# Start the Node.js application (example command)
+CMD ["npm", "start"]
