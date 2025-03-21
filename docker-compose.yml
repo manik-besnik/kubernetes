@@ -31,13 +31,13 @@ services:
 
     node:
         build:
-            context: ./docker/nodejs
+            context: ./docker/nodejs  # Ensure this points to the directory containing the Dockerfile
         container_name: laravel-node
         volumes:
             - .:/var/www
         networks:
             - laravel-network
-        command: ["npm", "run", "dev"]  # Adjust based on your frontend build command
+        command: [ "npm", "run", "dev" ]
 
 networks:
     laravel-network:

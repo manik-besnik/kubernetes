@@ -1,17 +1,20 @@
 # Use the official Node.js image
 FROM node:latest
 
-# Set working directory
+# Set the working directory for the Node.js container
 WORKDIR /var/www
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+# Copy only the necessary files (package.json and package-lock.json)
+COPY ./package*.json ./
 
-# Install Node.js dependencies
+# Install npm dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY . .
+# Copy the rest of the frontend code into the container
+COPY ./resources/js/ ./  # Adjust path if your JS code is in a different location
 
-# Build the frontend assets
-RUN npm run build
+# Expose port for the frontend dev server (assuming Vite or Webpack)
+EXPOSE 3000
+
+# Run the development server
+CMD ["npm", "run", "dev"]
