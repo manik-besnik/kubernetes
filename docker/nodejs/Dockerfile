@@ -4,7 +4,8 @@ FROM node:latest
 # Set the working directory for the Node.js container
 WORKDIR /var/www
 
-# Copy only the necessary files (package.json and package-lock.json)
+# Copy package.json and package-lock.json to the container
+# Adjust the source path based on your directory structure
 COPY ./package*.json ./
 
 # Install npm dependencies

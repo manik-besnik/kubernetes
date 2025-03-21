@@ -1,19 +1,19 @@
 services:
     php:
         build:
-            context: ./docker/php
+            context: ./docker/php  # Path to the directory containing the PHP Dockerfile
         container_name: laravel-php
         volumes:
-            - .:/var/www
+            - .:/var/www  # Mount the entire project directory (including composer.json)
         networks:
             - laravel-network
         environment:
-            - DB_HOST=localhost  # Replace with your actual MySQL host
+            - DB_HOST=localhost
             - DB_PORT=3306
             - DB_DATABASE=kubernetes
             - DB_USERNAME=root
             - DB_PASSWORD=Manik@1234
-            - REDIS_HOST=localhost  # Replace with your actual Redis host
+            - REDIS_HOST=localhost
             - REDIS_PORT=6379
 
     nginx:
@@ -31,13 +31,15 @@ services:
 
     node:
         build:
-            context: ./docker/nodejs  # Ensure this points to the directory containing the Dockerfile
+            context: ./docker/nodejs
         container_name: laravel-node
         volumes:
-            - .:/var/www
+            - .:/var/www  # Mount the entire project directory
         networks:
             - laravel-network
-        command: [ "npm", "run", "dev" ]
+        command: ["npm", "run", "dev"]
+        ports:
+            - "3000:3000"  # Expose the dev server port
 
 networks:
     laravel-network:

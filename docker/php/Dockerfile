@@ -1,7 +1,7 @@
-# Use PHP 8.4 FPM image
+# Use the official PHP image with FPM
 FROM php:8.4-fpm
 
-# Install necessary extensions and tools
+# Install necessary PHP extensions and dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -11,24 +11,23 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libssl-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql zip \
-    && apt-get clean
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install gd zip
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Set working directory
+# Set the working directory
 WORKDIR /var/www
 
-# Copy the Laravel application
+# Copy the project files into the container (including composer.json)
 COPY . .
 
-# Install Laravel dependencies
-RUN composer install --no-scripts --no-autoloader
-RUN composer dump-autoload
+# Install Composer globally
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Expose port for PHP-FPM server
+# Run Composer install to install dependencies
+RUN composer install --no-scripts --no-autoloader
+
+# Expose port 9000 for the PHP-FPM server
 EXPOSE 9000
 
+# Set the entry point to start PHP-FPM
 CMD ["php-fpm"]
